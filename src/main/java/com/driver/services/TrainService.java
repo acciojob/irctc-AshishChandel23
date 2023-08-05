@@ -101,7 +101,7 @@ public class TrainService {
                 old = Math.max(old, p.getAge());
             }
         }
-        return old;
+        return old==Integer.MAX_VALUE ? 0 : old;
     }
 
     public List<Integer> trainsBetweenAGivenTime(Station station, LocalTime startTime, LocalTime endTime){
