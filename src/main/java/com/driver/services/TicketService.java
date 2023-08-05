@@ -55,7 +55,11 @@ public class TicketService {
         Train train = optionalTrain.get();
 
         List<Ticket> tickets = train.getBookedTickets();
-        int leftSeats = train.getNoOfSeats()-tickets.size();
+        int consumeSeats = 0;
+        for(Ticket t : tickets){
+            consumeSeats+=t.getPassengersList().size();
+        }
+        int leftSeats = train.getNoOfSeats()-consumeSeats;
         if(leftSeats < bookTicketEntryDto.getNoOfSeats()){
             throw new Exception("Less tickets are available");
         }
@@ -86,7 +90,7 @@ public class TicketService {
                 toStation = i;
             }
         }
-        if(fromStation==-1 || toStation==-1 || toStation-fromStation<0){
+        if(fromStation==-1 || toStation==-1 || toStation-fromStation<=0){
             throw new Exception("Invalid stations");
         }
         int travelCostPerPassenger = (toStation-fromStation)*300;
