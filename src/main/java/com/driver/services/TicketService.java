@@ -44,13 +44,13 @@ public class TicketService {
        //And the end return the ticketId that has come from db
 
         Optional<Train> optionalTrain = trainRepository.findById(bookTicketEntryDto.getTrainId());
-        if(!optionalTrain.isPresent()){
-            throw new RuntimeException("Train doesn't exists");
-        }
+//        if(!optionalTrain.isPresent()){
+//            throw new RuntimeException("Train doesn't exists");
+//        }
         Optional<Passenger> optionalBookingPerson = passengerRepository.findById(bookTicketEntryDto.getBookingPersonId());
-        if(!optionalBookingPerson.isPresent()){
-            throw new RuntimeException("Passenger doesn't exists");
-        }
+//        if(!optionalBookingPerson.isPresent()){
+//            throw new RuntimeException("Passenger doesn't exists");
+//        }
         Passenger bookingPerson = optionalBookingPerson.get();
         Train train = optionalTrain.get();
 
