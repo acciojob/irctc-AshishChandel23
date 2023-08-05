@@ -43,24 +43,67 @@ public class TrainService {
 
     public Integer calculateAvailableSeats(SeatAvailabilityEntryDto seatAvailabilityEntryDto){
 
-        //Calculate the total seats available
-        //Suppose the route is A B C D
-        //And there are 2 seats avaialble in total in the train
-        //and 2 tickets are booked from A to C and B to D.
-        //The seat is available only between A to C and A to B. If a seat is empty between 2 station it will be counted to our final ans
-        //even if that seat is booked post the destStation or before the boardingStation
-        //Inshort : a train has totalNo of seats and there are tickets from and to different locations
-        //We need to find out the available seats between the given 2 stations.
         int trainId = seatAvailabilityEntryDto.getTrainId();
         Station fromStation = seatAvailabilityEntryDto.getFromStation();
         Station toStation = seatAvailabilityEntryDto.getToStation();
         Optional<Train> optionalTrain = trainRepository.findById(trainId);
-        if(!optionalTrain.isPresent()){
-            throw new RuntimeException("Train doesn't exists");
+        if (!optionalTrain.isPresent()) {
+            throw new RuntimeException("Train doesn't exist");
         }
         Train train = optionalTrain.get();
 
-       return null;
+        // Calculate the total seats available between the given two stations
+        // Suppose the route is A -> B -> C -> D, and there are 2 seats available in total in the train
+        // and 2 tickets are booked from A to C and B to D.
+        // The seat is available only between A to C and A to B.
+        // If a seat is empty between 2 stations, it will be counted towards our final answer,
+        // even if that seat is booked post the destStation or before the boardingStation.
+
+        // Find the index of fromStation and toStation in the route
+        String[] stations = train.getRoute().split(",");
+        int fromIndex = -1;
+        int toIndex = -1;
+        for (int i = 0; i < stations.length; i++) {
+            if (stations[i].equals(fromStation.toString())) {
+                fromIndex = i;
+            }
+            if (stations[i].equals(toStation.toString())) {
+                toIndex = i;
+            }
+        }
+
+        if (fromIndex == -1 || toIndex == -1) {
+            throw new RuntimeException("Invalid fromStation or toStation");
+        }
+
+        // Calculate the number of booked seats between fromStation and toStation
+        int bookedSeats = 0;
+        for (Ticket ticket : train.getBookedTickets()) {
+            List<Passenger> passengers = ticket.getPassengersList();
+            int ticketFromIndex = -1;
+            int ticketToIndex = -1;
+
+            // Find the index of ticket's fromStation and toStation in the route
+            for (int i = 0; i < stations.length; i++) {
+                if (stations[i].equals(ticket.getFromStation().toString())) {
+                    ticketFromIndex = i;
+                }
+                if (stations[i].equals(ticket.getToStation().toString())) {
+                    ticketToIndex = i;
+                }
+            }
+
+            // If the ticket is between fromStation and toStation, add the booked seats to total bookedSeats
+            if (ticketFromIndex >= fromIndex && ticketToIndex <= toIndex) {
+                bookedSeats += passengers.size();
+            }
+        }
+
+        // Calculate the total available seats between fromStation and toStation
+        int totalSeats = train.getNoOfSeats();
+        int availableSeats = totalSeats - bookedSeats;
+
+        return availableSeats;
     }
 
     public Integer calculatePeopleBoardingAtAStation(Integer trainId,Station station) throws Exception{
@@ -75,8 +118,8 @@ public class TrainService {
         }
         Train train = optionalTrain.get();
         String route = train.getRoute();
-        if(station.toString().indexOf(route)==-1){
-            throw new Exception("Train is not passing from this station");
+        if (!route.contains(station.toString())) {
+            throw new Exception("Train is not passing through this station");
         }
         int passenger = 0;
         for(Ticket t : train.getBookedTickets()){
