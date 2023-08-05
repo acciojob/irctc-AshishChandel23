@@ -125,9 +125,8 @@ public class TrainService {
             }
             if(getStationNumber!=-1){
                 LocalTime getTimeToReachStation = train.getDepartureTime().plusHours(1);
-                if(startTime.isBefore(getTimeToReachStation) &&
-                        endTime.isAfter(getTimeToReachStation) &&
-                        getTimeToReachStation.equals(startTime) &&
+                if((startTime.isBefore(getTimeToReachStation) && endTime.isAfter(getTimeToReachStation)) ||
+                        getTimeToReachStation.equals(startTime) ||
                         getTimeToReachStation.equals(endTime)
                 )   trainIds.add(train.getTrainId());
             }
